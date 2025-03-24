@@ -33,14 +33,22 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Dependencies
+  spec.add_dependency "zeitwerk", "~> 2.6"
   spec.add_dependency "addressable", "~> 2.8"
   spec.add_dependency "public_suffix", "~> 6.0"
-  spec.add_dependency "zeitwerk", "~> 2.6"
+  spec.add_dependency "faraday", "~> 2.12"
+  spec.add_dependency "faraday-cookie_jar", "~> 0.0"
+  spec.add_dependency "faraday-encoding", "~> 0.0"
+  spec.add_dependency "faraday-follow_redirects", "~> 0.3"
+  spec.add_dependency "faraday-gzip", "~> 3.0"
+  spec.add_dependency "faraday-http-cache", "~> 2.5"
+  spec.add_dependency "faraday-retry", "~> 2.2"
 
   # Development dependencies
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "minitest-reporters", "~> 1.6"
-
+  spec.add_development_dependency "vcr", "~> 6.3"
+  spec.add_development_dependency "webmock", "~> 3.25"
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
 end

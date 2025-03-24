@@ -1,0 +1,39 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://example.org/
+    body:
+      encoding: UTF-8
+      string: test=true
+    headers:
+      User-Agent:
+      - Faraday v2.12.2
+      Accept-Encoding:
+      - gzip,deflate
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 403
+      message: Forbidden
+    headers:
+      Mime-Version:
+      - '1.0'
+      Content-Type:
+      - text/html
+      Content-Length:
+      - '361'
+      Cache-Control:
+      - max-age=0
+      Date:
+      - Mon, 24 Mar 2025 20:41:40 GMT
+      Connection:
+      - close
+    body:
+      encoding: UTF-8
+      string: "<HTML><HEAD>\n<TITLE>Access Denied</TITLE>\n</HEAD><BODY>\n<H1>Access
+        Denied</H1>\n \nYou don't have permission to access \"http&#58;&#47;&#47;example&#46;org&#47;\"
+        on this server.<P>\nReference&#32;&#35;18&#46;84f6d517&#46;1742848900&#46;41b55c1f\n<P>https&#58;&#47;&#47;errors&#46;edgesuite&#46;net&#47;18&#46;84f6d517&#46;1742848900&#46;41b55c1f</P>\n</BODY>\n</HTML>\n"
+  recorded_at: Mon, 24 Mar 2025 20:41:40 GMT
+recorded_with: VCR 6.3.1

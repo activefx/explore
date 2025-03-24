@@ -1,0 +1,48 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://example.org/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      X-Custom:
+      - test
+      User-Agent:
+      - Faraday v2.12.2
+      Accept-Encoding:
+      - gzip,deflate
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Accept-Ranges:
+      - bytes
+      Content-Type:
+      - text/html
+      Etag:
+      - '"84238dfc8092e5d9c0dac8ef93371a07:1736799080.121134"'
+      Last-Modified:
+      - Mon, 13 Jan 2025 20:11:20 GMT
+      Vary:
+      - Accept-Encoding
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '648'
+      Cache-Control:
+      - max-age=1126
+      Date:
+      - Mon, 24 Mar 2025 20:42:31 GMT
+      Connection:
+      - keep-alive
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAH1UTXPbIBC9+1ds1UsyIyQnaRqPLWn6mWkPaQ9pDz0SsbKYCFAByfZ08t+7Qo4jN5makYFdeLvvsZC9Eqb0uxah9qopZtljh1wUM6Bf5qVvsPi85aptED4ZxaXO0tE6G5co9BzKmluHPo86X7FFBGkxcdbetwx/d7LPo49Ge9SeDWEjKMdZHnnc+nQIvzpAvYSkucI86iVuWmP9ZP9GCl/nAntZIguTGKSWXvKGuZI3mJ89QTm/IzJDBvvApXPR6LszYgd/wjBMeXm/tqbTgpWmMXYJr6s5tfPVYYnidi31EuZPppYLIfX6yFZRpqziSja7JTDekpzM7ZxHFcPYs07G8KGR+v6Gl7fBdE2bYohucW0Qfn6NaPy9RQ23XLth8gWbHr0sOXzDDslyMMTw3hJ3wqalzKGV1VMuYfAQ/oXsJ3SDcEt4O5+32+cML1EB77x5geg5qtV/RRPUJhncGSvQMsuF7BzplFweAZgtczUXZkPI7RYu6Luibxjb9R0/mcehJfPz09WEDF8O6sXU99JJj2JC7TGTi8WbxWKSyXD+TGBpLPfSEEttNE5B3ykUksOJ4lu21+dq0Od0An6s4lFV/KPYROVjx8MkZJaGCi3CWWXpeB1n2VCbdDsp2L6O67NnN5NMo68tftTSgQh2oFFlLHQOYZg1Tef8QLhHwBHBDQ56DjpF98kl8Mt0RGIXtnhCGqtlj6ahIXkJoLNIdHxtOg+tlRSiNHS0Ugcxgebc3VOFhOgtWiWdI0eSpe0hz4weCItVHg3PhFum6WazSSTXPDF2nY4hXbpPMypujB1IEKAKQZKE0HgRELM0iJOle6nS8UH7CyjrfG/oBAAA
+  recorded_at: Mon, 24 Mar 2025 20:42:31 GMT
+recorded_with: VCR 6.3.1
