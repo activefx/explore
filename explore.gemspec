@@ -44,6 +44,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "faraday-gzip", "~> 3.0"
   spec.add_dependency "faraday-http-cache", "~> 2.5"
   spec.add_dependency "faraday-retry", "~> 2.2"
+  spec.add_dependency "gort", "~> 0.1"
 
   # Development dependencies
   spec.add_development_dependency "minitest", "~> 5.0"

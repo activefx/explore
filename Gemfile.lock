@@ -11,6 +11,7 @@ PATH
       faraday-gzip (~> 3.0)
       faraday-http-cache (~> 2.5)
       faraday-retry (~> 2.2)
+      gort (~> 0.1)
       public_suffix (~> 6.0)
       zeitwerk (~> 2.6)
 
@@ -65,6 +66,9 @@ GEM
       net-http (>= 0.5.0)
     faraday-retry (2.2.1)
       faraday (~> 2.0)
+    gort (0.1.0)
+      addressable (~> 2.8)
+      rchardet (~> 1.8)
     hashdiff (1.1.2)
     http-cookie (1.0.8)
       domain_name (~> 0.5)
@@ -93,6 +97,7 @@ GEM
       stringio
     public_suffix (6.0.1)
     rake (13.2.1)
+    rchardet (1.9.0)
     rdoc (6.13.0)
       psych (>= 4.0.0)
     reline (0.6.0)
