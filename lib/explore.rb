@@ -3,6 +3,7 @@
 require_relative "explore/version"
 require_relative "explore/errors"
 require "zeitwerk"
+require "active_support/all"
 
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect(

@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
 
   # Dependencies
   spec.add_dependency "zeitwerk", "~> 2.6"
+  spec.add_dependency "activesupport", ">= 7.0"
   spec.add_dependency "addressable", "~> 2.8"
   spec.add_dependency "public_suffix", "~> 6.0"
   spec.add_dependency "faraday", "~> 2.12"
