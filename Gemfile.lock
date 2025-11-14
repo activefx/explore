@@ -146,6 +146,7 @@ GEM
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
+    yard (0.9.37)
     zeitwerk (2.7.3)
     zlib (3.2.2)
 
@@ -162,6 +163,7 @@ DEPENDENCIES
   rubocop-rake
   vcr
   webmock
+  yard
 
 BUNDLED WITH
    2.6.6
