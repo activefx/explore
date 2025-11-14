@@ -91,6 +91,7 @@ module Explore
     #     encoding: "UTF-8",
     #     headers: {"User-Agent" => "MyBot/1.0"}
     #   )
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def initialize(initial_url, options = {})
       @url = initial_url.is_a?(Explore::URI) ? initial_url : Explore::URI.new(initial_url)
       @method = options[:method] || :get
@@ -111,6 +112,7 @@ module Explore
 
       response # request early so we can fail early
     end
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
     # Reads and returns the response body with optional encoding conversion.
     #
@@ -264,7 +266,7 @@ module Explore
     #   request = Explore::Request.new("https://example.com")
     #   request.charset  # => "utf-8"
     def charset
-      return unless content_type && content_type.include?(";")
+      return unless content_type&.include?(";")
 
       parts = content_type.split(";")[1..]
       charset_part = parts.find { |part| part.match?(/charset=/) }
@@ -321,6 +323,7 @@ module Explore
     # @return [Faraday::Response] The HTTP response
     # @raise [Explore::TimeoutError] If the overall request times out
     # @api private
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     def fetch
       Timeout.timeout(fatal_timeout) do
         @faraday_options.merge!(url: url)
@@ -364,6 +367,7 @@ module Explore
     rescue Timeout::Error => e
       raise Explore::TimeoutError, e
     end
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     # Checks if the current HTTP method supports redirects.
     #

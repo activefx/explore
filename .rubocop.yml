@@ -14,6 +14,24 @@ AllCops:
     - 'node_modules/**/*'
     - 'bin/*'
 
+# Metrics
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*'
+    - '**/*_test.rb'
+    - '**/*.gemspec'
+    - 'Rakefile'
+  AllowedMethods:
+    - timeout  # Timeout.timeout blocks often wrap complex logic
+
+Metrics/ClassLength:
+  Max: 130  # Slight increase for complex core classes
+
+Metrics/ModuleLength:
+  Exclude:
+    - 'test/**/*'
+    - '**/*_test.rb'
+
 # Style
 Style/FrozenStringLiteralComment:
   Enabled: true
