@@ -165,8 +165,7 @@ module Explore
     #   end
     # end
 
-    # TODO:
-    #   Fetch webpage, check meta links
+    # TODO: Fetch webpage, check meta links
     #   As a last resort, grab all domain links on the homepage
     #   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
   end

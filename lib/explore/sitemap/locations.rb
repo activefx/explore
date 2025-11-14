@@ -2,6 +2,8 @@
 
 module Explore
   module Sitemap
+    # Locations manages a collection of sitemap sources and provides
+    # methods to filter and combine them.
     class Locations
       include Enumerable
 

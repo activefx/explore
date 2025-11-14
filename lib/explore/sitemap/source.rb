@@ -2,6 +2,8 @@
 
 module Explore
   module Sitemap
+    # Source represents a single sitemap location with its metadata,
+    # status, and response information.
     class Source
       STATUS = %i[
         pending
@@ -14,6 +16,7 @@ module Explore
       attr_accessor :status, :errors, :response_url, :status_code, :last_modified, :content_type, :content_encoding
       attr_reader :path, :origin, :tags, :content_types
 
+      # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
       def initialize(
         path:,
         origin: nil,
@@ -39,6 +42,7 @@ module Explore
         @content_type = content_type
         @content_encoding = content_encoding
       end
+      # rubocop:enable Metrics/ParameterLists, Metrics/MethodLength
 
       def url(origin: @origin)
         Addressable::URI.join(origin, path).to_s

@@ -11,6 +11,8 @@ loader.inflector.inflect(
 )
 loader.setup
 
+# Explore is a Ruby library for exploring web resources via HTTP requests,
+# parsing URIs, and analyzing website metadata.
 module Explore
   class << self
     def new(uri, **)

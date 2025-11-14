@@ -2,6 +2,8 @@
 
 module Explore
   module Sitemap
+    # Search performs HTTP requests to discover and verify sitemap locations.
+    # Uses a streaming approach similar to HEAD requests to minimize bandwidth.
     class Search
       # Similar to a HEAD request, as it does not download the body.
       # Used instead of a HEAD request since some sites respond with
@@ -51,6 +53,7 @@ module Explore
       # - use #media_type instead of #content_type
       # - use #charset if #content_encoding is nil
 
+      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       def run
         sources.each_with_index do |source, _index|
           source.status = :in_progress
@@ -78,6 +81,7 @@ module Explore
         end
         sources
       end
+      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
       private
 
