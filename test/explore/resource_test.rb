@@ -88,5 +88,90 @@ module Explore
         assert_equal 2, head.request.instance_variable_get(:@retries)
       end
     end
+
+    def test_robots_with_custom_options
+      resource = Explore::Resource.new("https://example.com", robots: { connection_timeout: 20, retries: 7 })
+
+      # Mock the Request to verify options are passed through
+      mock_request = Minitest::Mock.new
+      mock_request.expect :body, "User-agent: *\nDisallow: /private/"
+
+      Explore::Request.stub :new, lambda { |_url, **opts|
+        assert_equal 20, opts[:connection_timeout]
+        assert_equal 7, opts[:retries]
+        mock_request
+      } do
+        robots = resource.robots
+
+        assert_instance_of Explore::Robots, robots
+        assert_predicate robots, :success?
+      end
+
+      mock_request.verify
+    end
+
+    def test_robots_default_behavior_without_options
+      resource = Explore::Resource.new("https://example.com")
+
+      # Mock the Request to verify default options are used
+      mock_request = Minitest::Mock.new
+      mock_request.expect :body, "User-agent: *\nDisallow: /"
+
+      Explore::Request.stub :new, lambda { |_url, **opts|
+        # Should use Robots' default retries (2)
+        assert_equal 2, opts[:retries]
+        # Should use Robots' default connection_timeout (5)
+        assert_equal 5, opts[:connection_timeout]
+        mock_request
+      } do
+        robots = resource.robots
+
+        assert_instance_of Explore::Robots, robots
+      end
+
+      mock_request.verify
+    end
+
+    def test_robots_caching
+      resource = Explore::Resource.new("https://example.com")
+
+      # Mock the Request - should only be called once due to caching
+      mock_request = Minitest::Mock.new
+      mock_request.expect :body, "User-agent: *\nDisallow: /"
+
+      Explore::Request.stub :new, lambda { |_url, **_opts|
+        mock_request
+      } do
+        robots1 = resource.robots
+        robots2 = resource.robots
+
+        # Should return the same cached object
+        assert_same robots1, robots2
+      end
+
+      mock_request.verify
+    end
+
+    def test_reset_clears_robots_cache
+      resource = Explore::Resource.new("https://example.com")
+
+      call_count = 0
+
+      Explore::Request.stub :new, lambda { |_url, **_opts|
+        call_count += 1
+        mock = Minitest::Mock.new
+        mock.expect :body, "User-agent: *\nDisallow: /"
+        mock
+      } do
+        robots1 = resource.robots
+        resource.reset!
+        robots2 = resource.robots
+
+        # Should be different objects after reset
+        refute_same robots1, robots2
+        # Should have created two separate Request objects
+        assert_equal 2, call_count
+      end
+    end
   end
 end

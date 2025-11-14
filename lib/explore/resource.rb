@@ -18,6 +18,10 @@ module Explore
   # @example Custom HEAD request options
   #   resource = Explore.new("https://example.com", head: { connection_timeout: 10, retries: 5 })
   #   resource.head # Uses custom timeout and retries
+  #
+  # @example Custom robots.txt options
+  #   resource = Explore.new("https://example.com", robots: { connection_timeout: 15 })
+  #   resource.robots # Uses custom timeout for robots.txt fetch
   class Resource
     # @return [Explore::URI] The parsed URI for this resource
     attr_reader :uri
@@ -31,6 +35,7 @@ module Explore
     # @param options [Hash] Options for resource exploration
     # @option options [Hash] :domain Options to pass to Explore::Domain.new (e.g., ignore_private)
     # @option options [Hash] :head Options to pass to Explore::Head.new (e.g., connection_timeout, retries)
+    # @option options [Hash] :robots Options to pass to Explore::Robots.new (e.g., connection_timeout, retries)
     def initialize(input, **options)
       @uri = input.is_a?(Explore::URI) ? input : Explore::URI.new(input)
       @domain = Explore::Domain.new(@uri.host, **(options[:domain] || {}))
@@ -73,10 +78,17 @@ module Explore
     end
 
     # Parse and return the robots.txt file for this resource
+    # Results are cached - subsequent calls return the same Robots object.
+    #
+    # Options can be passed during Resource initialization via the :robots key.
     #
     # @return [Explore::Robots] The parsed robots.txt
+    #
+    # @example With custom robots.txt options
+    #   resource = Explore.new("https://example.com", robots: { connection_timeout: 15 })
+    #   resource.robots # Uses custom timeout for robots.txt fetch
     def robots
-      @robots ||= Explore::Robots.new(uri: robots_txt_url)
+      @robots ||= Explore::Robots.new(uri: robots_txt_url, **(@options[:robots] || {}))
     end
 
     # Get sitemap locations from robots.txt

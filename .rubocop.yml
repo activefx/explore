@@ -30,6 +30,11 @@ Metrics/ClassLength:
     - 'test/**/*'
     - '**/*_test.rb'
 
+Metrics/MethodLength:
+  Exclude:
+    - 'test/**/*'
+    - '**/*_test.rb'
+
 Metrics/ModuleLength:
   Exclude:
     - 'test/**/*'
