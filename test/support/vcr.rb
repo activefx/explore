@@ -27,8 +27,6 @@ VCR.configure do |config|
 end
 
 # Helper method for tests
-def with_vcr_cassette(name, **options)
-  VCR.use_cassette(name, options) do
-    yield
-  end
+def with_vcr_cassette(name, **options, &)
+  VCR.use_cassette(name, options, &)
 end

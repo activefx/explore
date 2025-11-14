@@ -12,7 +12,7 @@ desc "Start an interactive console with the gem's files loaded"
 task :console do
   require "irb"
   require "bundler/setup"
-  $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+  $LOAD_PATH.unshift File.expand_path("lib", __dir__)
   require "explore"
   ARGV.clear
   IRB.start
