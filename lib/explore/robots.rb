@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "gort"
 
 module Explore
@@ -68,11 +70,9 @@ module Explore
     # @return [Explore::Request] The HTTP response
     # @private
     def response
-      begin
-        @request = Explore::Request.new(@uri, **DEFAULT_OPTIONS)
-      rescue Explore::TimeoutError, Explore::RequestError => e
-        @errors << e.message
-      end
+      @request = Explore::Request.new(@uri, **DEFAULT_OPTIONS)
+    rescue Explore::TimeoutError, Explore::RequestError => e
+      @errors << e.message
     end
   end
 end

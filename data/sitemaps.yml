@@ -1,0 +1,8 @@
+---
+- path: /sitemap.xml
+  tags:
+    - common
+    - sitemap
+    - xml
+  content_types:
+    - text/xml

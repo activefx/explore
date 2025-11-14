@@ -13,8 +13,8 @@ loader.setup
 
 module Explore
   class << self
-    def new(uri)
-      Resource.new(uri)
+    def new(uri, **)
+      Resource.new(uri, **)
     end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 module Explore
@@ -23,6 +25,7 @@ module Explore
     def test_accepts_string_url_and_converts_to_explore_uri
       with_vcr_cassette("example_org") do
         request = Explore::Request.new(@valid_url)
+
         assert_instance_of Explore::URI, request.url
         assert_equal @valid_url, request.url.to_s
       end
@@ -32,6 +35,7 @@ module Explore
       with_vcr_cassette("example_org") do
         uri = Explore::URI.new(@valid_url)
         request = Explore::Request.new(uri)
+
         assert_equal uri, request.url
       end
     end
@@ -39,6 +43,7 @@ module Explore
     def test_accepts_valid_options
       with_vcr_cassette("example_org_with_options") do
         request = Explore::Request.new(@valid_url, @valid_options)
+
         assert_equal :head, request.response.env.method
       end
     end
@@ -58,6 +63,7 @@ module Explore
     def test_reads_content_of_page
       with_vcr_cassette("example_org") do
         request = Explore::Request.new(@valid_url)
+
         assert_match(/<!doctype html>/, request.read[0..14])
       end
     end
@@ -65,6 +71,7 @@ module Explore
     def test_contains_response_status
       with_vcr_cassette("example_org") do
         request = Explore::Request.new(@valid_url)
+
         assert_equal 200, request.response.status
       end
     end
@@ -72,6 +79,7 @@ module Explore
     def test_contains_response_headers
       with_vcr_cassette("example_org") do
         request = Explore::Request.new(@valid_url)
+
         assert_equal "text/html", request.response.headers["Content-Type"]
       end
     end
@@ -79,6 +87,7 @@ module Explore
     def test_returns_correct_content_type_for_html_pages
       with_vcr_cassette("example_org") do
         request = Explore::Request.new(@valid_url)
+
         assert_equal "text/html", request.content_type
       end
     end
@@ -86,6 +95,7 @@ module Explore
     def test_returns_correct_content_type_for_non_html_pages
       with_vcr_cassette("iana_logo_header") do
         request = Explore::Request.new("https://www.iana.org/_img/2025.01/iana-logo-header.svg")
+
         assert_equal "image/svg+xml", request.content_type
       end
     end
@@ -158,7 +168,8 @@ module Explore
     def test_follows_redirects_when_allowed
       with_vcr_cassette("github_com") do
         request = Explore::Request.new("http://github.com/",
-          allow_redirections: true)
+                                       allow_redirections: true)
+
         assert_equal "https://github.com/", request.url.to_s
       end
     end
@@ -166,8 +177,9 @@ module Explore
     def test_respects_connection_and_read_timeouts
       with_vcr_cassette("timeouts") do
         request = Explore::Request.new(@valid_url,
-          connection_timeout: 5,
-          read_timeout: 10)
+                                       connection_timeout: 5,
+                                       read_timeout: 10)
+
         assert_equal 5, request.response.env.request.timeout
         assert_equal 10, request.response.env.request.open_timeout
       end
@@ -176,8 +188,9 @@ module Explore
     def test_supports_http_methods_with_bodies
       with_vcr_cassette("post_request") do
         request = Explore::Request.new(@valid_url,
-          method: :post,
-          body: "test=true")
+                                       method: :post,
+                                       body: "test=true")
+
         assert_equal :post, request.response.env.method
         assert_equal "test=true", request.response.env.request_body
       end
@@ -186,7 +199,8 @@ module Explore
     def test_supports_custom_headers
       with_vcr_cassette("custom_headers") do
         request = Explore::Request.new(@valid_url,
-          headers: { "X-Custom" => "test" })
+                                       headers: { "X-Custom" => "test" })
+
         assert_equal "test", request.response.env.request_headers["X-Custom"]
       end
     end

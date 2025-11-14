@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "public_suffix"
 
 module Explore
@@ -18,7 +20,7 @@ module Explore
     # @option options [Boolean] :ignore_private Whether to ignore private domains (default: true)
     def initialize(domain, options = {})
       @options = DEFAULT_OPTIONS.merge(options)
-      @domain = PublicSuffix.parse(domain, **DEFAULT_OPTIONS.merge(options))
+      @domain = PublicSuffix.parse(domain, **DEFAULT_OPTIONS, **options)
     end
 
     # Returns the string representation of the domain
@@ -42,7 +44,7 @@ module Explore
     # Extracts the 'www' prefix if present
     # @return [String, nil] The www prefix if present, nil otherwise
     def www
-      domain.name.match(%r{(?<www>\Aw{2}(w|\d))\.+.+\.}) { |m| m[:www] }
+      domain.name.match(/(?<www>\Aw{2}(w|\d))\.+.+\./) { |m| m[:www] }
     end
 
     # Returns the domain name without the 'www' prefix
@@ -52,9 +54,9 @@ module Explore
     end
 
     # Forward missing methods to @domain
-    def method_missing(method_name, *args, &block)
+    def method_missing(method_name, *, &)
       if domain.respond_to?(method_name)
-        domain.send(method_name, *args, &block)
+        domain.send(method_name, *, &)
       else
         super
       end

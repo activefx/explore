@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 module Explore
@@ -26,6 +28,7 @@ module Explore
 
       Explore::Request.stub :new, mock_response do
         robots = Robots.new(uri: uri)
+
         assert_instance_of Robots, robots
         assert_empty robots.errors
       end
@@ -34,8 +37,9 @@ module Explore
     test "handles request errors gracefully" do
       uri = "https://example.com/robots.txt"
 
-      Explore::Request.stub :new, ->(*args) { raise Explore::RequestError, "Failed to fetch" } do
+      Explore::Request.stub :new, ->(*_args) { raise Explore::RequestError, "Failed to fetch" } do
         robots = Robots.new(uri: uri)
+
         assert_includes robots.errors, "Failed to fetch"
       end
     end
@@ -43,8 +47,9 @@ module Explore
     test "handles timeout errors gracefully" do
       uri = "https://example.com/robots.txt"
 
-      Explore::Request.stub :new, ->(*args) { raise Explore::TimeoutError, "Request timed out" } do
+      Explore::Request.stub :new, ->(*_args) { raise Explore::TimeoutError, "Request timed out" } do
         robots = Robots.new(uri: uri)
+
         assert_includes robots.errors, "Request timed out"
       end
     end
@@ -60,6 +65,7 @@ module Explore
 
     test "handles empty robots.txt content" do
       robots = Robots.new(contents: "")
+
       assert_empty robots.sitemaps
       assert_empty robots.rules
     end
@@ -73,7 +79,7 @@ module Explore
     end
 
     test "DEFAULT_OPTIONS are frozen" do
-      assert Robots::DEFAULT_OPTIONS.frozen?
+      assert_predicate Robots::DEFAULT_OPTIONS, :frozen?
       assert_raises(FrozenError) { Robots::DEFAULT_OPTIONS[:method] = :post }
     end
   end
