@@ -16,11 +16,12 @@ module Explore
     #
     # @param input [String, Explore::URI] The URI to explore
     # @param options [Hash] Options for resource exploration (reserved for future use)
-    def initialize(input, **_options)
+    def initialize(input, **options)
       @uri = input.is_a?(Explore::URI) ? input : Explore::URI.new(input)
       @domain = Explore::Domain.new(@uri.host, ignore_private: true)
       @head = nil
       @robots = nil
+      @options = options
     end
 
     # Perform a HEAD request to the URI and return the response information.
