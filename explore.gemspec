@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Extract metadata from web pages"
   spec.description = "Explore is a Ruby library for extracting metadata from web pages and URIs."
-  spec.homepage = "https://github.com/roboruby/explore"
+  spec.homepage = "https://github.com/activefx/explore"
   spec.required_ruby_version = ">= 3.2.0"
 
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
