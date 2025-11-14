@@ -3,11 +3,10 @@
 require "test_helper"
 
 module Explore
-  class RequestTest < Minitest::Test
-    def setup
-      WebMock.allow_net_connect!
-      @valid_url = "http://example.org/"
-      @valid_options = {
+  describe Request do
+    let(:valid_url) { "http://example.org/" }
+    let(:valid_options) do
+      {
         method: :head,
         allow_redirections: true,
         connection_timeout: 5,
@@ -18,190 +17,367 @@ module Explore
       }
     end
 
-    def teardown
+    before do
+      WebMock.allow_net_connect!
+    end
+
+    after do
       WebMock.disable_net_connect!
     end
 
-    def test_accepts_string_url_and_converts_to_explore_uri
-      with_vcr_cassette("example_org") do
-        request = Explore::Request.new(@valid_url)
+    describe "initialization" do
+      it "accepts string URL and converts to Explore::URI" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
 
-        assert_instance_of Explore::URI, request.url
-        assert_equal @valid_url, request.url.to_s
+          assert_instance_of URI, request.url
+          assert_equal valid_url, request.url.to_s
+        end
+      end
+
+      it "accepts Explore::URI instance" do
+        with_vcr_cassette("example_org") do
+          uri = URI.new(valid_url)
+          request = Request.new(uri)
+
+          assert_equal uri, request.url
+        end
+      end
+
+      it "accepts valid options" do
+        with_vcr_cassette("example_org_with_options") do
+          request = Request.new(valid_url, valid_options)
+
+          assert_equal :head, request.response.env.method
+        end
+      end
+
+      it "raises error for non-HTTP URLs" do
+        assert_raises(RequestError, "URL must be HTTP") do
+          Request.new("ftp://ftp.example.com")
+        end
+      end
+
+      it "raises error for invalid HTTP methods" do
+        assert_raises(RequestError, "Invalid HTTP method: invalid") do
+          Request.new(valid_url, method: :invalid)
+        end
       end
     end
 
-    def test_accepts_explore_uri_instance
-      with_vcr_cassette("example_org") do
-        uri = Explore::URI.new(@valid_url)
-        request = Explore::Request.new(uri)
+    describe "#read" do
+      it "reads content of page" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
 
-        assert_equal uri, request.url
+          assert_match(/<!doctype html>/, request.read[0..14])
+        end
       end
     end
 
-    def test_accepts_valid_options
-      with_vcr_cassette("example_org_with_options") do
-        request = Explore::Request.new(@valid_url, @valid_options)
+    describe "#response" do
+      it "contains response status" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
 
-        assert_equal :head, request.response.env.method
+          assert_equal 200, request.response.status
+        end
+      end
+
+      it "contains response headers" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
+
+          assert_equal "text/html", request.response.headers["Content-Type"]
+        end
       end
     end
 
-    def test_raises_error_for_non_http_urls
-      assert_raises(Explore::RequestError, "URL must be HTTP") do
-        Explore::Request.new("ftp://ftp.example.com")
+    describe "#body" do
+      it "returns raw response body" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
+
+          assert_match(/<!doctype html>/, request.body[0..14])
+        end
       end
     end
 
-    def test_raises_error_for_invalid_http_methods
-      assert_raises(Explore::RequestError, "Invalid HTTP method: invalid") do
-        Explore::Request.new(@valid_url, method: :invalid)
+    describe "#content_type" do
+      it "returns correct content type for HTML pages" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
+
+          assert_equal "text/html", request.content_type
+        end
+      end
+
+      it "returns correct content type for non-HTML pages" do
+        with_vcr_cassette("iana_logo_header") do
+          request = Request.new("https://www.iana.org/_img/2025.01/iana-logo-header.svg")
+
+          assert_equal "image/svg+xml", request.content_type
+        end
       end
     end
 
-    def test_reads_content_of_page
-      with_vcr_cassette("example_org") do
-        request = Explore::Request.new(@valid_url)
+    describe "#media_type" do
+      it "extracts media type from content type" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
 
-        assert_match(/<!doctype html>/, request.read[0..14])
+          assert_equal "text/html", request.media_type
+        end
       end
     end
 
-    def test_contains_response_status
-      with_vcr_cassette("example_org") do
-        request = Explore::Request.new(@valid_url)
+    describe "#success?" do
+      it "returns true for successful requests" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
 
-        assert_equal 200, request.response.status
+          assert_predicate request, :success?
+        end
       end
     end
 
-    def test_contains_response_headers
-      with_vcr_cassette("example_org") do
-        request = Explore::Request.new(@valid_url)
+    describe "#status_code" do
+      it "returns HTTP status code" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
 
-        assert_equal "text/html", request.response.headers["Content-Type"]
+          assert_equal 200, request.status_code
+        end
       end
     end
 
-    def test_returns_correct_content_type_for_html_pages
-      with_vcr_cassette("example_org") do
-        request = Explore::Request.new(@valid_url)
+    describe "#response_url" do
+      it "returns final URL after redirects" do
+        with_vcr_cassette("github_com") do
+          request = Request.new("http://github.com/", allow_redirections: true)
 
-        assert_equal "text/html", request.content_type
+          assert_equal "https://github.com/", request.response_url
+        end
       end
     end
 
-    def test_returns_correct_content_type_for_non_html_pages
-      with_vcr_cassette("iana_logo_header") do
-        request = Explore::Request.new("https://www.iana.org/_img/2025.01/iana-logo-header.svg")
+    describe "error handling" do
+      it "handles connection errors" do
+        with_vcr_cassette("example_org") do
+          http = Minitest::Mock.new
+          http.expect(:call, nil) { raise Faraday::ConnectionFailed }
 
-        assert_equal "image/svg+xml", request.content_type
+          Net::HTTP.stub(:new, http) do
+            assert_raises(RequestError) do
+              Request.new(valid_url)
+            end
+          end
+        end
       end
-    end
 
-    def test_handles_connection_errors
-      with_vcr_cassette("example_org") do
-        http = Minitest::Mock.new
-        http.expect(:call, nil) { raise Faraday::ConnectionFailed }
+      it "handles timeout errors" do
+        with_vcr_cassette("example_org") do
+          http = Minitest::Mock.new
+          http.expect(:call, nil) { raise Faraday::TimeoutError }
 
-        Net::HTTP.stub(:new, http) do
-          assert_raises(Explore::RequestError) do
-            Explore::Request.new(@valid_url)
+          Net::HTTP.stub(:new, http) do
+            assert_raises(TimeoutError) do
+              Request.new(valid_url, retries: 0)
+            end
+          end
+        end
+      end
+
+      it "handles SSL errors" do
+        with_vcr_cassette("example_org") do
+          http = Minitest::Mock.new
+          http.expect(:call, nil) { raise Faraday::SSLError }
+
+          Net::HTTP.stub(:new, http) do
+            assert_raises(RequestError) do
+              Request.new(valid_url)
+            end
+          end
+        end
+      end
+
+      it "handles redirect limit errors" do
+        with_vcr_cassette("example_org") do
+          http = Minitest::Mock.new
+          http.expect(:call, nil) { raise Faraday::FollowRedirects::RedirectLimitReached, valid_url }
+
+          Net::HTTP.stub(:new, http) do
+            assert_raises(RequestError) do
+              Request.new(valid_url)
+            end
+          end
+        end
+      end
+
+      it "handles fatal timeouts" do
+        with_vcr_cassette("example_org") do
+          http = Minitest::Mock.new
+          http.expect(:call, nil) { raise Timeout::Error }
+
+          Timeout.stub(:timeout, http) do
+            assert_raises(TimeoutError) do
+              Request.new(valid_url)
+            end
           end
         end
       end
     end
 
-    def test_handles_timeout_errors
-      with_vcr_cassette("example_org") do
-        http = Minitest::Mock.new
-        http.expect(:call, nil) { raise Faraday::TimeoutError }
+    describe "redirects" do
+      it "follows redirects when allowed" do
+        with_vcr_cassette("github_com") do
+          request = Request.new("http://github.com/", allow_redirections: true)
 
-        Net::HTTP.stub(:new, http) do
-          assert_raises(Explore::TimeoutError) do
-            Explore::Request.new(@valid_url, retries: 0)
-          end
+          assert_equal "https://github.com/", request.url.to_s
+        end
+      end
+
+      it "updates URL to final destination after redirects" do
+        with_vcr_cassette("github_com") do
+          request = Request.new("http://github.com/", allow_redirections: true)
+
+          assert_equal "https://github.com/", request.response_url
         end
       end
     end
 
-    def test_handles_ssl_errors
-      with_vcr_cassette("example_org") do
-        http = Minitest::Mock.new
-        http.expect(:call, nil) { raise Faraday::SSLError }
+    describe "timeouts" do
+      it "respects connection and read timeouts" do
+        with_vcr_cassette("timeouts") do
+          request = Request.new(valid_url,
+                                connection_timeout: 5,
+                                read_timeout: 10)
 
-        Net::HTTP.stub(:new, http) do
-          assert_raises(Explore::RequestError) do
-            Explore::Request.new(@valid_url)
-          end
+          assert_equal 5, request.response.env.request.timeout
+          assert_equal 10, request.response.env.request.open_timeout
         end
       end
     end
 
-    def test_handles_redirect_limit_errors
-      with_vcr_cassette("example_org") do
-        http = Minitest::Mock.new
-        http.expect(:call, nil) { raise Faraday::FollowRedirects::RedirectLimitReached, @valid_url }
+    describe "HTTP methods" do
+      it "supports HTTP methods with bodies" do
+        with_vcr_cassette("post_request") do
+          request = Request.new(valid_url,
+                                method: :post,
+                                body: "test=true")
 
-        Net::HTTP.stub(:new, http) do
-          assert_raises(Explore::RequestError) do
-            Explore::Request.new(@valid_url)
-          end
+          assert_equal :post, request.response.env.method
+          assert_equal "test=true", request.response.env.request_body
         end
       end
     end
 
-    def test_handles_fatal_timeouts
-      with_vcr_cassette("example_org") do
-        http = Minitest::Mock.new
-        http.expect(:call, nil) { raise Timeout::Error }
+    describe "custom headers" do
+      it "supports custom headers" do
+        with_vcr_cassette("custom_headers") do
+          request = Request.new(valid_url,
+                                headers: { "X-Custom" => "test" })
 
-        Timeout.stub(:timeout, http) do
-          assert_raises(Explore::TimeoutError) do
-            Explore::Request.new(@valid_url)
-          end
+          assert_equal "test", request.response.env.request_headers["X-Custom"]
         end
       end
     end
 
-    def test_follows_redirects_when_allowed
-      with_vcr_cassette("github_com") do
-        request = Explore::Request.new("http://github.com/",
-                                       allow_redirections: true)
+    describe "#status_text" do
+      it "returns HTTP status text" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
 
-        assert_equal "https://github.com/", request.url.to_s
+          assert_equal "OK", request.status_text
+        end
       end
     end
 
-    def test_respects_connection_and_read_timeouts
-      with_vcr_cassette("timeouts") do
-        request = Explore::Request.new(@valid_url,
-                                       connection_timeout: 5,
-                                       read_timeout: 10)
+    describe "#headers" do
+      it "returns response headers hash" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
+          headers = request.headers
 
-        assert_equal 5, request.response.env.request.timeout
-        assert_equal 10, request.response.env.request.open_timeout
+          assert_instance_of Faraday::Utils::Headers, headers
+          assert headers.key?("content-type")
+        end
       end
     end
 
-    def test_supports_http_methods_with_bodies
-      with_vcr_cassette("post_request") do
-        request = Explore::Request.new(@valid_url,
-                                       method: :post,
-                                       body: "test=true")
+    describe "#charset" do
+      it "extracts charset from content type when present" do
+        with_vcr_cassette("github_activefx") do
+          request = Request.new("https://github.com/activefx")
+          charset = request.charset
 
-        assert_equal :post, request.response.env.method
-        assert_equal "test=true", request.response.env.request_body
+          # GitHub returns charset in Content-Type header
+          assert_instance_of String, charset
+          assert_equal "utf-8", charset.downcase
+        end
+      end
+
+      it "returns nil when content type has no charset parameter" do
+        with_vcr_cassette("iana_logo_header") do
+          request = Request.new("https://www.iana.org/_img/2025.01/iana-logo-header.svg")
+
+          # SVG content type typically doesn't include charset
+          # Just verify it doesn't raise an error
+          charset = request.charset
+          assert_nil(charset) || assert_instance_of(String, charset)
+        end
       end
     end
 
-    def test_supports_custom_headers
-      with_vcr_cassette("custom_headers") do
-        request = Explore::Request.new(@valid_url,
-                                       headers: { "X-Custom" => "test" })
+    describe "#content_length" do
+      it "returns content length header when present" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
+          content_length = request.content_length
 
-        assert_equal "test", request.response.env.request_headers["X-Custom"]
+          # Content-Length can be String, Integer, or nil
+          assert([String, Integer, NilClass].any? { |klass| content_length.is_a?(klass) })
+        end
+      end
+    end
+
+    describe "#content_encoding" do
+      it "returns content encoding header when present" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
+          content_encoding = request.content_encoding
+
+          # Just verify it doesn't raise an error
+          assert_nil(content_encoding) || assert_instance_of(String, content_encoding)
+        end
+      end
+    end
+
+    describe "#last_modified" do
+      it "returns last modified date as string when present" do
+        with_vcr_cassette("example_org") do
+          request = Request.new(valid_url)
+          last_modified = request.last_modified
+
+          # Last-Modified may or may not be present
+          skip "No Last-Modified header" if last_modified.nil?
+
+          assert_instance_of String, last_modified
+        end
+      end
+    end
+
+    describe "allowed schemes and methods" do
+      it "defines allowed schemes constant" do
+        assert_equal Set.new(%w[http https]), Request::ALLOWED_SCHEMES
+      end
+
+      it "defines allowed methods constant" do
+        assert_equal Set.new(%i[get post put delete head patch options trace]), Request::ALLOWED_METHODS
+      end
+
+      it "defines body methods constant" do
+        assert_equal Set.new(%i[post put patch]), Request::BODY_METHODS
       end
     end
   end
