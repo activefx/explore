@@ -26,6 +26,9 @@ Metrics/BlockLength:
 
 Metrics/ClassLength:
   Max: 130  # Slight increase for complex core classes
+  Exclude:
+    - 'test/**/*'
+    - '**/*_test.rb'
 
 Metrics/ModuleLength:
   Exclude:
