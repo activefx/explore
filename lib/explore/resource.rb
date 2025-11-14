@@ -5,6 +5,19 @@ module Explore
   #
   # This is the main class returned by Explore.new() that provides access to
   # various exploration methods like HEAD requests, robots.txt parsing, etc.
+  #
+  # @example Basic usage
+  #   resource = Explore.new("https://example.com")
+  #   resource.uri      # => Explore::URI instance
+  #   resource.domain   # => Explore::Domain instance
+  #
+  # @example Custom domain options
+  #   resource = Explore.new("https://example.com", domain: { ignore_private: false })
+  #   resource.domain.options # => { ignore_private: false }
+  #
+  # @example Custom HEAD request options
+  #   resource = Explore.new("https://example.com", head: { connection_timeout: 10, retries: 5 })
+  #   resource.head # Uses custom timeout and retries
   class Resource
     # @return [Explore::URI] The parsed URI for this resource
     attr_reader :uri
@@ -15,10 +28,12 @@ module Explore
     # Initialize a new Resource
     #
     # @param input [String, Explore::URI] The URI to explore
-    # @param options [Hash] Options for resource exploration (reserved for future use)
+    # @param options [Hash] Options for resource exploration
+    # @option options [Hash] :domain Options to pass to Explore::Domain.new (e.g., ignore_private)
+    # @option options [Hash] :head Options to pass to Explore::Head.new (e.g., connection_timeout, retries)
     def initialize(input, **options)
       @uri = input.is_a?(Explore::URI) ? input : Explore::URI.new(input)
-      @domain = Explore::Domain.new(@uri.host, ignore_private: true)
+      @domain = Explore::Domain.new(@uri.host, **(options[:domain] || {}))
       @head = nil
       @robots = nil
       @options = options
@@ -27,9 +42,15 @@ module Explore
     # Perform a HEAD request to the URI and return the response information.
     # Results are cached - subsequent calls return the same Head object.
     #
+    # Options can be passed during Resource initialization via the :head key.
+    #
     # @return [Explore::Head] The HEAD request response
+    #
+    # @example With custom HEAD options
+    #   resource = Explore.new("https://example.com", head: { connection_timeout: 10 })
+    #   resource.head # Uses custom timeout
     def head
-      @head ||= Explore::Head.new(@uri)
+      @head ||= Explore::Head.new(@uri, **(@options[:head] || {}))
     end
 
     # Check if a HEAD request has been made and was successful

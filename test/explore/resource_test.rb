@@ -40,10 +40,53 @@ module Explore
       end
     end
 
-    def test_domain_options
+    def test_domain_default_options
       resource = Explore::Resource.new("https://example.com")
 
       assert resource.domain.options[:ignore_private]
+    end
+
+    def test_domain_custom_options
+      resource = Explore::Resource.new("https://example.com", domain: { ignore_private: false })
+
+      refute resource.domain.options[:ignore_private]
+    end
+
+    def test_domain_options_override
+      # Test that custom options override defaults
+      resource = Explore::Resource.new("https://example.com", domain: { ignore_private: false })
+
+      assert_equal({ ignore_private: false }, resource.domain.options)
+    end
+
+    def test_head_with_custom_options
+      VCR.use_cassette("head_example_org") do
+        resource = Explore::Resource.new("https://example.org", head: { retries: 5, connection_timeout: 15 })
+        head = resource.head
+
+        assert_instance_of Explore::Head, head
+        assert_predicate head, :success?
+      end
+    end
+
+    def test_head_options_passed_through
+      VCR.use_cassette("head_example_org") do
+        resource = Explore::Resource.new("https://example.org", head: { retries: 10 })
+        head = resource.head
+
+        # The request object should have received the custom retries option
+        assert_equal 10, head.request.instance_variable_get(:@retries)
+      end
+    end
+
+    def test_head_default_behavior_without_options
+      VCR.use_cassette("head_example_org") do
+        resource = Explore::Resource.new("https://example.org")
+        head = resource.head
+
+        # Should use Head's default retries (2)
+        assert_equal 2, head.request.instance_variable_get(:@retries)
+      end
     end
   end
 end
