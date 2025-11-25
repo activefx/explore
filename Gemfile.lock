@@ -157,6 +157,7 @@ PLATFORMS
 DEPENDENCIES
   explore!
   irb
+  minitest
   rake
   rubocop
   rubocop-minitest
